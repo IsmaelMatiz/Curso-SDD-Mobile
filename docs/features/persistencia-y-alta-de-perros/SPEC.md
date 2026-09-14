@@ -1,6 +1,6 @@
 # SPEC: Persistencia local y alta de perros
 
-**Estado:** En revisión <!-- Borrador | En revisión | Aprobada -->
+**Estado:** Aprobada <!-- Borrador | En revisión | Aprobada -->
 
 <!-- PARA LA PERSONA
 Copia esta plantilla como SPEC.md en una carpeta de la funcionalidad.
