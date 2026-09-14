@@ -2,7 +2,7 @@
 
 **SPEC de referencia:** `docs/features/persistencia-y-alta-de-perros/SPEC.md`
 **Versión de la spec revisada:** commit `73bd8fb`, estado Aprobada
-**Estado:** Borrador <!-- Borrador | En revisión | Aprobado -->
+**Estado:** Aprobado <!-- Borrador | En revisión | Aprobado -->
 
 <!-- PARA LA PERSONA
 Copia esta plantilla como PLAN.md junto a la SPEC.md aprobada.
