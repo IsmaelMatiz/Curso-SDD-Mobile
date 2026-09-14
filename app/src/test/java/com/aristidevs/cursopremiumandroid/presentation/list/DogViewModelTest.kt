@@ -58,6 +58,14 @@ class DogViewModelTest {
         advanceUntilIdle()
         assertEquals(listOf(2L), viewModel.uiState.value.dogs.map { it.id })
 
+        viewModel.onQueryChange("rex")
+        advanceUntilIdle()
+        assertEquals(listOf(1L), viewModel.uiState.value.dogs.map { it.id })
+
+        viewModel.onQueryChange("pastor")
+        advanceUntilIdle()
+        assertEquals(listOf(1L), viewModel.uiState.value.dogs.map { it.id })
+
         job.cancel()
     }
 

@@ -57,6 +57,15 @@ class DogRepositoryImpl @Inject constructor(
     override suspend fun addDog(newDog: NewDog): Long {
         val pickedUri = Uri.parse(requireNotNull(newDog.photoUri) { "El alta requiere una foto" })
         val copiedUri = imageStore.copyToInternalStorage(pickedUri)
-        return dao.insertLocal(newDog.toEntity(copiedUri.toString()))
+        var inserted = false
+        try {
+            val id = dao.insertLocal(newDog.toEntity(copiedUri.toString()))
+            inserted = true
+            return id
+        } finally {
+            // The photo was already copied; if the row never made it in, don't
+            // leave an orphaned file behind (PLAN.md decision 4).
+            if (!inserted) imageStore.delete(copiedUri)
+        }
     }
 }
