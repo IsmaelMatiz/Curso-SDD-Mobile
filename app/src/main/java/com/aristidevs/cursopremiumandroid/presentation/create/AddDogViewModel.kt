@@ -54,15 +54,16 @@ class AddDogViewModel @Inject constructor(private val addDogUseCase: AddDogUseCa
 
     /**
      * Guarded so that several rapid taps only ever create one dog (CA-11): the
-     * in-progress flag is read and set as the very first thing inside the
-     * coroutine, before any suspending work, so a second launch queued on the
-     * same single-threaded dispatcher always observes it already set.
+     * in-progress flag is read and set synchronously, before any coroutine is
+     * launched, so a second call arriving before the first one's save work has
+     * even started is still rejected (waiting for that work to run would not
+     * be enough, since it may complete without ever suspending).
      */
     fun onSaveClicked() {
-        viewModelScope.launch {
-            if (_uiState.value.isSaving) return@launch
-            _uiState.update { it.copy(isSaving = true) }
+        if (_uiState.value.isSaving) return
+        _uiState.update { it.copy(isSaving = true) }
 
+        viewModelScope.launch {
             val state = _uiState.value
             val newDog = NewDog(
                 name = state.name.trim(),

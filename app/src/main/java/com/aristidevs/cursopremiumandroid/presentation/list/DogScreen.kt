@@ -124,7 +124,7 @@ fun DogContent(
                 }
 
                 uiState.totalDogsCount == 0 -> {
-                    EmptyNoDogsState()
+                    EmptyNoDogsState(onAddDogClicked)
                 }
 
                 uiState.dogs.isEmpty() -> {
@@ -237,13 +237,19 @@ fun LoadingDogState() {
 }
 
 @Composable
-fun EmptyNoDogsState() {
+fun EmptyNoDogsState(onAddDogClicked: () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            stringResource(R.string.dogs_empty_no_dogs_title),
-            color = SecondaryText,
-            fontSize = 16.sp
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                stringResource(R.string.dogs_empty_no_dogs_title),
+                color = SecondaryText,
+                fontSize = 16.sp
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onAddDogClicked) {
+                Text(stringResource(R.string.dogs_empty_no_dogs_action))
+            }
+        }
     }
 }
 

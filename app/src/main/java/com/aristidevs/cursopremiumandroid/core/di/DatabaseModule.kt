@@ -3,6 +3,7 @@ package com.aristidevs.cursopremiumandroid.core.di
 import android.content.Context
 import androidx.room.Room
 import com.aristidevs.cursopremiumandroid.data.image.DogImageStore
+import com.aristidevs.cursopremiumandroid.data.image.DogImageStoreImpl
 import com.aristidevs.cursopremiumandroid.data.local.DogDao
 import com.aristidevs.cursopremiumandroid.data.local.DogDatabase
 import dagger.Module
@@ -29,6 +30,6 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDogImageStore(@ApplicationContext context: Context): DogImageStore {
-        return DogImageStore(context)
+        return DogImageStoreImpl(context)
     }
 }

@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -209,7 +210,13 @@ fun AddDogContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.height(20.dp), color = Color.White)
+                    val savingDescription = stringResource(R.string.add_dog_saving)
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .height(20.dp)
+                            .semantics { contentDescription = savingDescription },
+                        color = Color.White
+                    )
                 } else {
                     Text(stringResource(R.string.add_dog_confirm))
                 }

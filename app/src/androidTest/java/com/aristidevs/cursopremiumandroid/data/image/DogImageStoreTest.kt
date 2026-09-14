@@ -15,7 +15,7 @@ import kotlinx.coroutines.runBlocking
 class DogImageStoreTest {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val store = DogImageStore(context)
+    private val store: DogImageStore = DogImageStoreImpl(context)
 
     @Test
     fun copyToInternalStorage_copiesContentAndSurvivesRereadingThePath() = runBlocking {

@@ -12,11 +12,20 @@ import javax.inject.Inject
  * Copies a photo picked through the system selector into the app's internal
  * storage. The selector only grants a temporary read permission on its URI;
  * without this copy the photo would stop being visible after the process
- * ends (RF-09, PLAN.md decision 4).
+ * ends (RF-09, PLAN.md decision 4). An interface so repository tests can use
+ * a hand-written fake instead of a real `Context` (PLAN.md: "sin librería de
+ * mocking").
  */
-class DogImageStore @Inject constructor(private val context: Context) {
+interface DogImageStore {
+    suspend fun copyToInternalStorage(sourceUri: Uri): Uri
 
-    suspend fun copyToInternalStorage(sourceUri: Uri): Uri = withContext(Dispatchers.IO) {
+    /** Removes a copy made by [copyToInternalStorage], e.g. when an add flow is discarded. */
+    suspend fun delete(uri: Uri)
+}
+
+class DogImageStoreImpl @Inject constructor(private val context: Context) : DogImageStore {
+
+    override suspend fun copyToInternalStorage(sourceUri: Uri): Uri = withContext(Dispatchers.IO) {
         val directory = File(context.filesDir, DOGS_DIRECTORY).apply { mkdirs() }
         val destination = File(directory, "${UUID.randomUUID()}.jpg")
         val input = context.contentResolver.openInputStream(sourceUri)
@@ -27,8 +36,7 @@ class DogImageStore @Inject constructor(private val context: Context) {
         Uri.fromFile(destination)
     }
 
-    /** Removes a copy made by [copyToInternalStorage], e.g. when an add flow is discarded. */
-    suspend fun delete(uri: Uri) = withContext(Dispatchers.IO) {
+    override suspend fun delete(uri: Uri) = withContext(Dispatchers.IO) {
         uri.path?.let { path -> File(path).delete() }
         Unit
     }
