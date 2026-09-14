@@ -1,9 +1,7 @@
 package com.aristidevs.cursopremiumandroid.core.di
 
 import com.aristidevs.cursopremiumandroid.core.di.DogApiConfig.BASE_URL
-import com.aristidevs.cursopremiumandroid.data.DogRepositoryImpl
 import com.aristidevs.cursopremiumandroid.data.api.DogApiServices
-import com.aristidevs.cursopremiumandroid.domain.DogRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,12 +36,6 @@ object DataModule {
     @Singleton
     fun providesDogApiServices(retrofit: Retrofit):DogApiServices{
         return retrofit.create(DogApiServices::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDogRepository(api: DogApiServices): DogRepository{
-        return DogRepositoryImpl(api)
     }
 }
 

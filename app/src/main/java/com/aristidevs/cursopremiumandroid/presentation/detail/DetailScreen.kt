@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +46,7 @@ import com.aristidevs.cursopremiumandroid.ui.theme.SecondaryText
 
 @Composable
 fun DogDetailScreen(
-    id: Int, onBackSelected: () -> Unit, viewModel: DogDetailViewModel = hiltViewModel()
+    id: Long, onBackSelected: () -> Unit, viewModel: DogDetailViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,7 +75,7 @@ fun DogDetailContent(uiState: DogDetailUiState, onBackSelected: () -> Unit) {
                     IconButton(onBackSelected) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow),
-                            contentDescription = "back"
+                            contentDescription = stringResource(R.string.detail_back_description)
                         )
                     }
                 }, colors = TopAppBarDefaults.topAppBarColors(
@@ -92,8 +93,8 @@ fun DogDetailContent(uiState: DogDetailUiState, onBackSelected: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             when (uiState) {
-                is DogDetailUiState.Error -> {
-                    Text(uiState.message)
+                DogDetailUiState.NotFound -> {
+                    Text(stringResource(R.string.detail_not_found), color = Color.White)
                 }
 
                 DogDetailUiState.Loading -> {
@@ -118,7 +119,7 @@ fun DogDetailSuccessContent(dogDetail: DogDetailModel) {
     ) {
         AsyncImage(
             dogDetail.image,
-            contentDescription = "dog",
+            contentDescription = dogDetail.name,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
@@ -143,23 +144,26 @@ fun DogDetailSuccessContent(dogDetail: DogDetailModel) {
 
         Spacer(Modifier.height(24.dp))
 
+        // Weight and origin are optional (RF-07): each row simply does not render when empty.
         Card(
             Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = BackgroundComponent)
         ) {
             Column(Modifier.padding(20.dp)) {
-                DetailRow("Edad", dogDetail.age.toString() )
-                DetailRow("Peso", dogDetail.weight )
-                DetailRow("Origen", dogDetail.origin )
+                DetailRow("Edad", dogDetail.age.toString())
+                dogDetail.weight?.let { DetailRow("Peso", it) }
+                dogDetail.origin?.let { DetailRow("Origen", it) }
             }
         }
 
         Spacer(Modifier.height(24.dp))
 
         Text(dogDetail.description, fontSize = 16.sp, color = Color.White)
-        Spacer(Modifier.height(8.dp))
-        Text(dogDetail.temperament, fontSize = 16.sp, color = Color.White)
+        dogDetail.temperament?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, fontSize = 16.sp, color = Color.White)
+        }
     }
 }
 

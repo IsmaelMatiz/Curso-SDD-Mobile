@@ -1,3 +1,41 @@
 <resources>
     <string name="app_name">CursoSDMD</string>
+
+    <!-- Listado -->
+    <string name="dogs_empty_no_dogs_title">Todavía no hay ningún perro</string>
+    <string name="dogs_empty_no_dogs_action">Dar de alta tu primer perro</string>
+    <string name="dogs_empty_no_search_results">No se han encontrado coincidencias</string>
+    <string name="dogs_refresh_error_no_connection">No se ha podido actualizar el catálogo por falta de conexión</string>
+    <string name="dogs_refresh_error_unexpected">No se ha podido actualizar el catálogo</string>
+    <string name="dogs_refresh_retry">Reintentar</string>
+    <string name="dogs_own_label">Tuyo</string>
+    <string name="dogs_add_fab_description">Dar de alta un perro</string>
+    <string name="dogs_search_field_label">Buscar por nombre o raza</string>
+
+    <!-- Ficha -->
+    <string name="detail_back_description">Volver</string>
+    <string name="detail_not_found">No se ha encontrado este perro</string>
+
+    <!-- Alta de perro -->
+    <string name="add_dog_title">Dar de alta un perro</string>
+    <string name="add_dog_name_label">Nombre</string>
+    <string name="add_dog_breed_label">Raza</string>
+    <string name="add_dog_age_label">Edad</string>
+    <string name="add_dog_description_label">Descripción</string>
+    <string name="add_dog_weight_label">Peso (opcional)</string>
+    <string name="add_dog_origin_label">Origen (opcional)</string>
+    <string name="add_dog_temperament_label">Temperamento (opcional)</string>
+    <string name="add_dog_photo_cta">Elegir foto</string>
+    <string name="add_dog_photo_selected_description">Foto elegida para el perro</string>
+    <string name="add_dog_confirm">Guardar</string>
+    <string name="add_dog_saving">Guardando…</string>
+    <string name="add_dog_discard_title">¿Descartar los cambios?</string>
+    <string name="add_dog_discard_message">Perderás lo que has escrito si sales ahora.</string>
+    <string name="add_dog_discard_confirm">Descartar</string>
+    <string name="add_dog_discard_cancel">Seguir editando</string>
+
+    <string name="add_dog_error_required">Este campo es obligatorio</string>
+    <string name="add_dog_error_too_long">Supera la longitud máxima permitida</string>
+    <string name="add_dog_error_age_range">La edad debe estar entre 0 y 30 años</string>
+    <string name="add_dog_error_photo_required">Elige una foto para continuar</string>
 </resources>

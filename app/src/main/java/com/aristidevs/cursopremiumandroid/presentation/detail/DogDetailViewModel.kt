@@ -12,21 +12,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DogDetailViewModel @Inject constructor(private val dogDetailUseCase: GetDogDetailUseCase) :
+class DogDetailViewModel @Inject constructor(private val getDogDetailUseCase: GetDogDetailUseCase) :
     ViewModel() {
 
     private val _uiState = MutableStateFlow<DogDetailUiState>(DogDetailUiState.Loading)
     val uiState: StateFlow<DogDetailUiState> = _uiState.asStateFlow()
 
-    fun loadDog(id: Int) {
+    fun loadDog(id: Long) {
         viewModelScope.launch {
-            _uiState.value = DogDetailUiState.Loading
-            try {
-                val dogDetail = dogDetailUseCase(id)
-                _uiState.value = DogDetailUiState.Success(dogDetail)
-
-            } catch (e: Exception) {
-                _uiState.value = DogDetailUiState.Error(e.message.orEmpty())
+            getDogDetailUseCase(id).collect { detail ->
+                _uiState.value = if (detail != null) {
+                    DogDetailUiState.Success(detail)
+                } else {
+                    DogDetailUiState.NotFound
+                }
             }
         }
     }
@@ -36,5 +35,5 @@ class DogDetailViewModel @Inject constructor(private val dogDetailUseCase: GetDo
 sealed interface DogDetailUiState {
     data object Loading : DogDetailUiState
     data class Success(val dogDetail: DogDetailModel) : DogDetailUiState
-    data class Error(val message: String) : DogDetailUiState
+    data object NotFound : DogDetailUiState
 }

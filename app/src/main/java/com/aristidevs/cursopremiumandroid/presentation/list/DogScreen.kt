@@ -1,5 +1,6 @@
 package com.aristidevs.cursopremiumandroid.presentation.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -34,12 +37,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.aristidevs.cursopremiumandroid.R
 import com.aristidevs.cursopremiumandroid.domain.model.Dog
 import com.aristidevs.cursopremiumandroid.ui.theme.BackgroundApp
 import com.aristidevs.cursopremiumandroid.ui.theme.BackgroundComponent
@@ -50,16 +57,33 @@ import com.aristidevs.cursopremiumandroid.ui.theme.SecondaryText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DogsScreen(onDogClicked: (Int) -> Unit, viewModel: DogViewModel = hiltViewModel()) {
+fun DogsScreen(
+    onDogClicked: (Long) -> Unit,
+    onAddDogClicked: () -> Unit,
+    viewModel: DogViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    DogContent(uiState, onQueryChange = { viewModel.onQueryChange(it) }, onDogClicked =onDogClicked)
+    DogContent(
+        uiState = uiState,
+        onQueryChange = { viewModel.onQueryChange(it) },
+        onDogClicked = onDogClicked,
+        onAddDogClicked = onAddDogClicked,
+        onRetryRefresh = { viewModel.retryRefresh() }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DogContent(uiState: DogsUiState, onQueryChange: (String) -> Unit, onDogClicked: (Int) -> Unit) {
+fun DogContent(
+    uiState: DogsUiState,
+    onQueryChange: (String) -> Unit,
+    onDogClicked: (Long) -> Unit,
+    onAddDogClicked: () -> Unit,
+    onRetryRefresh: () -> Unit
+) {
     Scaffold(
-        containerColor = BackgroundApp, topBar = {
+        containerColor = BackgroundApp,
+        topBar = {
             TopAppBar(
                 title = { Text("Busca tu chucho") }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BackgroundApp,
@@ -67,7 +91,18 @@ fun DogContent(uiState: DogsUiState, onQueryChange: (String) -> Unit, onDogClick
                     navigationIconContentColor = Color.White
                 )
             )
-        }) { paddingValues ->
+        },
+        floatingActionButton = {
+            val addDogDescription = stringResource(R.string.dogs_add_fab_description)
+            FloatingActionButton(
+                onClick = onAddDogClicked,
+                containerColor = PrimaryButton,
+                modifier = Modifier.semantics { contentDescription = addDogDescription }
+            ) {
+                Text("+", fontSize = 28.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,20 +110,25 @@ fun DogContent(uiState: DogsUiState, onQueryChange: (String) -> Unit, onDogClick
                 .padding(16.dp)
         ) {
             DogSearchBar(uiState.query, onQueryChange)
+
+            if (uiState.refreshError != null) {
+                Spacer(Modifier.height(16.dp))
+                RefreshErrorBanner(uiState.refreshError, onRetryRefresh)
+            }
+
             Spacer(Modifier.height(32.dp))
+
             when {
-                uiState.isLoading -> {
+                uiState.isInitialLoading -> {
                     LoadingDogState()
                 }
-//
-                uiState.error != null -> {
-                    ErrorDogState(uiState.error)
+
+                uiState.totalDogsCount == 0 -> {
+                    EmptyNoDogsState()
                 }
 
                 uiState.dogs.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No hay resultados", color = SecondaryText)
-                    }
+                    EmptyNoSearchResultsState()
                 }
 
                 else -> {
@@ -112,6 +152,7 @@ fun DogSearchBar(query: String, onValueChanged: (String) -> Unit) {
     OutlinedTextField(
         value = query,
         onValueChange = onValueChanged,
+        label = { Text(stringResource(R.string.dogs_search_field_label)) },
         placeholder = { Text("Buscar perro...") },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
@@ -125,7 +166,7 @@ fun DogSearchBar(query: String, onValueChanged: (String) -> Unit) {
 }
 
 @Composable
-fun DogItem(dog: Dog, onDogClicked: (Int) -> Unit) {
+fun DogItem(dog: Dog, onDogClicked: (Long) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,7 +192,13 @@ fun DogItem(dog: Dog, onDogClicked: (Int) -> Unit) {
             Spacer(Modifier.width(16.dp))
 
             Column(Modifier.weight(1f)) {
-                Text(dog.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(dog.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    if (dog.isOwn) {
+                        Spacer(Modifier.width(8.dp))
+                        OwnDogLabel()
+                    }
+                }
                 Spacer(Modifier.height(4.dp))
                 Text(dog.breed, fontSize = 14.sp, color = PrimaryButton)
                 Spacer(Modifier.height(4.dp))
@@ -164,6 +211,24 @@ fun DogItem(dog: Dog, onDogClicked: (Int) -> Unit) {
     }
 }
 
+/** Text label, not just color, so a screen reader also announces it (RF-03, RF-13). */
+@Composable
+fun OwnDogLabel() {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color = PrimaryButton)
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    ) {
+        Text(
+            stringResource(R.string.dogs_own_label),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
+
 @Composable
 fun LoadingDogState() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -172,8 +237,50 @@ fun LoadingDogState() {
 }
 
 @Composable
-fun ErrorDogState(error: String) {
+fun EmptyNoDogsState() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(error, color = SecondaryText)
+        Text(
+            stringResource(R.string.dogs_empty_no_dogs_title),
+            color = SecondaryText,
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun EmptyNoSearchResultsState() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            stringResource(R.string.dogs_empty_no_search_results),
+            color = SecondaryText,
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun RefreshErrorBanner(error: CatalogRefreshError, onRetry: () -> Unit) {
+    val message = if (error == CatalogRefreshError.NO_CONNECTION) {
+        stringResource(R.string.dogs_refresh_error_no_connection)
+    } else {
+        stringResource(R.string.dogs_refresh_error_unexpected)
+    }
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundComponent)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(message, color = Color.White, fontSize = 13.sp, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
+            Button(onClick = onRetry) {
+                Text(stringResource(R.string.dogs_refresh_retry))
+            }
+        }
     }
 }

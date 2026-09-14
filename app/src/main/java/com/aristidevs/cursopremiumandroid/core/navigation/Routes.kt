@@ -7,4 +7,7 @@ import kotlinx.serialization.Serializable
 data object Dog: NavKey
 
 @Serializable
-data class DogDetail(val id:Int): NavKey
+data class DogDetail(val id: Long): NavKey
+
+@Serializable
+data object AddDog: NavKey
