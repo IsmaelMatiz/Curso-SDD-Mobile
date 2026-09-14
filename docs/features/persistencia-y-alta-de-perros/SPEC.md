@@ -1,11 +1,6 @@
 # SPEC: Persistencia local y alta de perros
 
-**Estado:** Borrador <!-- Borrador | En revisión | Aprobada -->
-
-> Marcas usadas en este borrador: **[PENDIENTE]** es una decisión sin tomar, con
-> su referencia a «Decisiones pendientes» (D3, D6…). **[PROPUESTA]** es algo que
-> el agente sugiere y que **no** está confirmado todavía. El resto son hechos
-> comprobados en el código y contra el API, o decisiones ya confirmadas.
+**Estado:** En revisión <!-- Borrador | En revisión | Aprobada -->
 
 <!-- PARA LA PERSONA
 Copia esta plantilla como SPEC.md en una carpeta de la funcionalidad.
@@ -39,7 +34,7 @@ servidor remoto: no puede registrar los suyos y, sin conexión, no ve nada.
 
 Queremos que pueda **dar de alta sus propios perros desde la app**, que esos
 perros **sigan estando disponibles al volver a abrirla** y que **el catálogo ya
-descargado pueda consultarse sin conexión**.
+descargado pueda consultarse por completo sin conexión**.
 
 A partir de esta funcionalidad, lo que la app muestra sale de lo guardado en el
 dispositivo; la red sirve para mantenerlo al día, no para poder usar la app.
@@ -67,6 +62,8 @@ Comprobado en el código y contra el API:
   Ese mismo estado aparecería si el catálogo llegara vacío: hoy no se distinguen.
 - Pedir la ficha de un identificador que no existe en el servidor devuelve un
   error 404, que la app presenta como error.
+- La ficha describe su imagen como «dog» y su botón de volver como «back», que es
+  lo que anunciaría un lector de pantalla.
 - No existe ninguna forma de crear, editar ni borrar perros.
 
 Comportamientos que deben conservarse: el listado, la búsqueda por nombre y raza,
@@ -81,24 +78,43 @@ criterios, decisiones del plan y tareas. -->
 - **RF-02:** Los perros dados de alta se conservan en el dispositivo y siguen
   disponibles tras cerrar la app, reabrirla o reiniciar el dispositivo.
 - **RF-03:** El catálogo muestra en una sola lista los perros remotos y los dados
-  de alta, sin duplicados. **[PENDIENTE]** orden y distinción visual (D7).
+  de alta, sin duplicados. Los perros propios aparecen primero e identificados con
+  una etiqueta de texto, no solo por color; los remotos conservan el orden en que
+  llegan del servidor.
 - **RF-04:** La búsqueda por nombre y raza cubre también los perros dados de alta.
-- **RF-05:** **[PROPUESTA]** Un perro dado de alta nunca es sustituido,
-  sobrescrito ni eliminado por una actualización del catálogo remoto, aunque
-  coincidan sus datos o su identificador (D15).
+- **RF-05:** Un perro dado de alta nunca es sustituido, sobrescrito ni eliminado
+  por una actualización del catálogo remoto, aunque coincidan sus datos o su
+  identificador.
 - **RF-06:** Con el catálogo ya descargado alguna vez, la app se puede usar sin
   conexión: la lista muestra los perros remotos y los propios sin mensaje de
-  error. **[PENDIENTE]** hasta dónde llega eso en las fichas de perros remotos
-  (D12) y qué se ve en un primer uso sin conexión (D13).
+  error, y **se puede abrir la ficha de cualquiera de ellos**, incluidos peso,
+  origen y temperamento de los remotos.
 - **RF-07:** Un perro dado de alta tiene ficha propia, con los mismos apartados
   que la de un perro remoto. Peso, origen y temperamento son opcionales: los que
   se dejen vacíos no aparecen en la ficha.
-- **RF-08:** El catálogo remoto se mantiene al día. **[PENDIENTE]** cuándo se
-  vuelve a pedir (D10) y qué ocurre con los perros remotos que cambian o
-  desaparecen (D14).
+- **RF-08:** El catálogo remoto se mantiene al día: al abrir la app se muestra de
+  inmediato lo guardado en el dispositivo y la actualización ocurre por detrás,
+  reflejándose en la lista cuando llega. La actualización incluye las fichas de
+  todos los perros del catálogo, para que estén disponibles sin conexión. Lo
+  guardado refleja lo que hay en el servidor: los perros remotos que cambian se
+  actualizan y los que dejan de estar en el catálogo se retiran del dispositivo.
 - **RF-09:** La imagen de un perro dado de alta se elige entre las fotos del
   dispositivo, sin que se pidan permisos adicionales, y sigue viéndose sin
   conexión.
+- **RF-10:** La app explica en lenguaje comprensible cuándo no ha podido
+  actualizar el catálogo y ofrece reintentar. Distingue «todavía no hay ningún
+  perro» de «la búsqueda no encuentra coincidencias». Aunque el catálogo remoto no
+  esté disponible, se pueden ver los perros propios y dar de alta nuevos.
+- **RF-11:** Al abandonar el formulario de alta con datos escritos sin guardar, se
+  pide confirmación antes de descartarlos.
+- **RF-12:** El catálogo guardado en el dispositivo está siempre completo y es
+  coherente: solo se sustituye por una actualización que se haya descargado
+  entera. Si la actualización falla, en la lista o en cualquiera de las fichas, se
+  conserva intacto lo que ya había.
+- **RF-13:** Las pantallas de esta funcionalidad son utilizables con lector de
+  pantalla: cada campo del formulario tiene su etiqueta, los mensajes de error se
+  asocian al campo que los provoca y las imágenes tienen una descripción con
+  sentido. Se corrigen además las descripciones «dog» y «back» de la ficha.
 
 ## Fuera de alcance
 
@@ -107,28 +123,31 @@ adicionales, indícalo tras revisarlo con la persona. -->
 
 - **Editar y borrar perros.** Solo se contempla el alta. Una vez creado, un perro
   dado de alta no se puede modificar ni eliminar desde la app.
-- **[PROPUESTA]** Pendientes de confirmar como exclusiones (D15): enviar los
-  perros dados de alta al servidor o a cualquier servicio remoto; sincronización
-  entre dispositivos; cuentas de usuario; compartir o exportar el catálogo.
+- **Enviar los perros dados de alta al servidor** o a cualquier otro servicio
+  remoto.
+- **Sincronización entre dispositivos** y **cuentas de usuario**.
+- **Compartir o exportar** el catálogo.
+- **Traducir la app.** Los textos nuevos se escriben como recursos para poder
+  traducirse en el futuro, pero no se añade ningún idioma ni se migran los textos
+  existentes.
 
 ## Flujo de usuario
 
 <!-- Cómo se inicia, qué hace el usuario y qué resultado obtiene.
 Incluye pantallas afectadas, navegación y alternativas relevantes. -->
 
-1. Desde el listado, la persona abre la pantalla de alta de un perro.
-   **[PENDIENTE]** punto de entrada (D6).
-2. Rellena los datos del perro y elige una foto del dispositivo. Puede indicar
-   además peso, origen y temperamento, que son opcionales. **[PENDIENTE]** cuáles
-   de los datos restantes son obligatorios (D3).
+1. En el listado, la persona pulsa el botón flotante de añadir y se abre la
+   pantalla de alta.
+2. Indica nombre, raza, edad y descripción, y elige una foto del dispositivo.
+   Puede añadir además peso, origen y temperamento, que son opcionales.
 3. Confirma el alta. Si falta un dato obligatorio o hay un valor no válido, se le
    indica qué corregir, no se guarda nada y no pierde lo escrito.
-4. Al guardarse correctamente, vuelve al listado y el perro aparece en él.
-   **[PENDIENTE]** en qué posición (D7).
+4. Al guardarse correctamente, vuelve al listado y el perro aparece al principio
+   de la lista, con la etiqueta que identifica a los perros propios.
 5. Puede encontrarlo con el buscador y abrir su ficha, que muestra los datos que
    rellenó y omite los apartados opcionales que dejó vacíos.
-6. Si sale de la pantalla de alta sin guardar, **[PENDIENTE]** qué ocurre con lo
-   escrito (D8).
+6. Si sale del formulario con datos escritos sin guardar, se le pide confirmación
+   antes de descartarlos; si confirma, el alta se cancela y no se crea nada.
 
 ## Datos y reglas de negocio
 
@@ -138,17 +157,23 @@ y comportamiento, sin diseñar tablas, DTO, DAO ni almacenamiento. -->
 
 - De cada perro, el listado muestra nombre, raza, edad, descripción e imagen; la
   ficha muestra además peso, origen y temperamento.
-- El alta recoge esos mismos datos. Peso, origen y temperamento son **opcionales**
-  y, si se dejan vacíos, no se muestran en la ficha. **[PENDIENTE]** cuáles de los
-  demás son obligatorios (D3).
-- La imagen se elige entre las fotos del dispositivo y queda disponible aunque no
-  haya conexión. **[PENDIENTE]** qué se muestra si la imagen es obligatoria y no
-  se elige ninguna, o si se permite dejarla vacía (D3).
-- **[PENDIENTE]** Validaciones: rango admitido para la edad, longitud máxima de
-  los textos y si se permiten nombres repetidos (D9).
+- Al dar de alta un perro son **obligatorios** nombre, raza, edad, descripción y
+  foto. Peso, origen y temperamento son **opcionales** y, si se dejan vacíos, no
+  se muestran en la ficha.
+- La foto se elige entre las del dispositivo y queda disponible aunque no haya
+  conexión.
+- Validaciones: la edad admite de 0 a 30 años; nombre, raza, peso, origen y
+  temperamento, hasta 50 caracteres cada uno; la descripción, hasta 300.
+- Se permiten varios perros con el mismo nombre: es normal tener un perro propio
+  que se llame igual que uno del catálogo, y la etiqueta del listado ya los
+  distingue.
 - Cada perro tiene identidad propia: un perro dado de alta y uno remoto nunca son
   el mismo, aunque coincidan en nombre y raza.
-- **[PENDIENTE]** Orden de presentación de la lista combinada (D7).
+- En el listado, los perros propios preceden a los remotos; entre los remotos se
+  respeta el orden que envía el servidor.
+- Lo guardado del catálogo remoto es un reflejo del servidor: se actualiza con sus
+  cambios y se retira lo que el servidor deja de ofrecer. Los perros propios no se
+  ven afectados por esas actualizaciones.
 
 ## Comportamiento mobile y casos alternativos
 
@@ -158,25 +183,26 @@ ni conservación de todo el estado. Expresa resultados, no mecanismos técnicos.
 
 | Situación | Comportamiento esperado |
 | --- | --- |
-| Carga o acción en curso | Mientras se refresca el catálogo o se guarda un perro, la persona percibe que la operación está en curso y la interfaz sigue respondiendo. **[PROPUESTA]** durante el guardado la acción de confirmar queda inhabilitada |
-| Sin datos | **[PENDIENTE]** (D11) Distinguir «no hay ningún perro todavía» de «la búsqueda no encuentra resultados»; hoy ambos casos muestran el mismo texto |
+| Carga o acción en curso | Habiendo datos guardados, la lista se muestra de inmediato y la actualización ocurre por detrás sin tapar el contenido. La indicación de carga a pantalla completa queda para el primer uso, cuando todavía no hay nada guardado. Al guardar un perro se percibe que la operación está en curso y la acción de confirmar queda inhabilitada mientras tanto |
+| Sin datos | Se distingue «todavía no hay ningún perro», que invita a dar de alta el primero, de «la búsqueda no encuentra coincidencias», que se refiere al texto buscado |
 | Entrada inválida | Se indica qué campo falla y por qué, no se crea ningún perro y se conserva lo escrito |
-| Error o espera excesiva | **[PENDIENTE]** (D11) Hoy se muestra el mensaje técnico del sistema y no se puede reintentar sin salir y volver a entrar |
-| Sin conexión o conexión interrumpida | Con el catálogo ya descargado, la lista muestra los perros remotos y los propios sin error. Dar de alta un perro funciona igual sin conexión, porque no implica ninguna llamada de red. **[PENDIENTE]** fichas de perros remotos (D12) y primer uso sin catálogo descargado (D13) |
-| Cancelar o volver atrás | **[PENDIENTE]** (D8) Salir del alta con datos escritos sin guardar. Si se cancela el selector de fotos sin elegir ninguna, el formulario queda como estaba |
-| Pasar a segundo plano y regresar | **[PROPUESTA]** Lo escrito en el formulario se conserva y no se repite la carga del catálogo solo por volver a la app |
-| Recrear la pantalla | **[PROPUESTA]** Al girar el dispositivo el formulario conserva lo escrito, incluida la foto elegida. La app no fija la orientación; hoy el listado y el texto de búsqueda sobreviven al giro |
-| Reabrir después de terminarse el proceso | Los perros dados de alta y el catálogo descargado siguen presentes (RF-02, RF-06). **[PENDIENTE]** si se recupera el texto de búsqueda o un formulario a medias (D8) |
-| Pulsaciones repetidas | **[PROPUESTA]** Confirmar el alta varias veces seguidas no crea perros duplicados |
-| Accesibilidad | **[PENDIENTE]** Etiquetas de los campos del formulario y descripción de las imágenes. Hoy las imágenes del listado usan el nombre del perro como descripción y el botón de volver se anuncia como «back» |
+| Error o espera excesiva | Se explica en lenguaje comprensible que no se ha podido actualizar el catálogo y se ofrece reintentar, sin mostrar el mensaje técnico del sistema. Si la actualización falla a medias, se conserva el catálogo anterior completo y el aviso no interrumpe lo que la persona esté haciendo |
+| Sin conexión o conexión interrumpida | Con el catálogo ya descargado, la lista y todas las fichas funcionan con normalidad. En un primer uso sin red, se avisa de que no se ha podido cargar el catálogo y se ofrece reintentar, pero la pantalla sigue siendo usable: se ven los perros propios y se puede dar de alta. Dar de alta un perro nunca requiere conexión |
+| Cancelar o volver atrás | Salir del alta con datos escritos pide confirmación antes de descartarlos. Si se cancela el selector de fotos sin elegir ninguna, el formulario queda como estaba |
+| Pasar a segundo plano y regresar | Lo escrito en el formulario se conserva, incluida la foto elegida, y no se repite la actualización del catálogo solo por volver a la app |
+| Recrear la pantalla | Al girar el dispositivo, el formulario conserva lo escrito y la foto elegida. La app no fija la orientación; el listado y el texto de búsqueda siguen sobreviviendo al giro, como hoy |
+| Reabrir después de terminarse el proceso | Los perros dados de alta y el catálogo descargado siguen presentes (RF-02, RF-06). Un formulario a medias no se recupera: se descarta, en coherencia con la confirmación al salir. El texto de búsqueda tampoco se recupera, como hoy |
+| Pulsaciones repetidas | Confirmar el alta varias veces seguidas crea un solo perro |
+| Accesibilidad | Los campos del formulario se anuncian con su etiqueta, los errores se asocian a su campo y las imágenes tienen descripción con sentido. La etiqueta que distingue a los perros propios es texto, de modo que también la anuncia el lector de pantalla. Se corrigen «dog» y «back» en la ficha |
 | Permisos | Elegir una foto se hace con el selector del sistema y no obliga a conceder ningún permiso. Si la persona no elige ninguna foto, no se pide nada |
 | Privacidad | Los perros dados de alta, imágenes incluidas, se quedan en el dispositivo: no se envían al servidor ni a ningún otro servicio |
-| Rendimiento y recursos | **[PROPUESTA]** Las fotos elegidas no deben hacer crecer el almacenamiento sin control ni ralentizar el listado |
-| Idiomas y formatos | **[PENDIENTE]** Hoy los textos están escritos directamente en castellano dentro del código, sin recursos de traducción; decidir si el alta sigue esa práctica o usa recursos |
+| Rendimiento y uso de datos | Guardar las fichas de todo el catálogo supone una petición por perro además de la lista en cada actualización. Esa actualización no bloquea la interfaz ni se repite sin necesidad, y las fotos elegidas no hacen crecer el almacenamiento sin control |
+| Idiomas y formatos | Los textos de las pantallas nuevas y de los mensajes de error y vacío que se rediseñan viven en recursos de texto, no escritos dentro del código. No se añade ningún idioma ni se migran los textos ya existentes |
 
 **Puntos de la guía no aplicables y motivo:** *Trabajo en segundo plano*: no hay
 tareas diferidas ni envíos pendientes, porque nada se sincroniza hacia el
-servidor. *Capacidades del dispositivo*: no se usa cámara, ubicación ni sensores.
+servidor; la actualización del catálogo ocurre con la app abierta.
+*Capacidades del dispositivo*: no se usa cámara, ubicación ni sensores.
 
 ## Restricciones del pedido
 
@@ -229,7 +255,41 @@ Repite el formato según sea necesario. -->
   dispositivo, entonces la app no me pide ningún permiso.
 - **CA-11 · RF-01:** Dado un alta con datos válidos, cuando pulso confirmar varias
   veces seguidas, entonces se crea un único perro.
-- **CA-12 · RF-08:** **[PENDIENTE]** (D10, D14).
+- **CA-12 · RF-08:** Dado un catálogo ya guardado, cuando abro la app, entonces la
+  lista aparece de inmediato con ese contenido, sin pantalla de carga, y refleja
+  los cambios del servidor cuando la actualización termina.
+- **CA-13 · RF-06:** Dado que el catálogo se descargó al menos una vez, cuando
+  abro sin conexión la ficha de un perro remoto que nunca había visitado, entonces
+  veo su peso, origen y temperamento.
+- **CA-14 · RF-03:** Dado un catálogo con perros remotos y al menos un perro
+  propio, cuando abro el listado, entonces los propios aparecen antes que los
+  remotos y llevan una etiqueta de texto que los identifica.
+- **CA-15 · RF-08:** Dado un perro remoto que el servidor deja de incluir en el
+  catálogo, cuando la app se actualiza, entonces ese perro desaparece de la lista
+  y los perros propios permanecen intactos.
+- **CA-16 · RF-10:** Dado un primer uso sin conexión y sin catálogo descargado,
+  cuando abro la app, entonces veo un aviso comprensible con opción de reintentar,
+  sigo viendo mis perros propios si los hay y puedo dar de alta uno nuevo.
+- **CA-17 · RF-10:** Dado un catálogo vacío y sin perros propios, cuando abro el
+  listado, entonces el mensaje que veo es distinto del que aparece cuando una
+  búsqueda no encuentra coincidencias.
+- **CA-18 · RF-11:** Dado el formulario de alta con datos escritos, cuando vuelvo
+  atrás, entonces se me pide confirmación y solo se descarta lo escrito si
+  confirmo.
+- **CA-19 · RF-12:** Dada una actualización que se interrumpe después de descargar
+  la lista pero antes de completar todas las fichas, cuando vuelvo al listado,
+  entonces sigo viendo el catálogo anterior completo y se me informa de que no se
+  pudo actualizar.
+- **CA-20 · RF-01:** Dado el formulario de alta, cuando escribo una edad fuera del
+  rango de 0 a 30 años o un texto más largo del límite de su campo, entonces se me
+  indica el problema y no se crea el perro.
+- **CA-21 · RF-13:** Dado el lector de pantalla activo, cuando recorro el
+  formulario de alta y la ficha de un perro, entonces cada campo se anuncia con su
+  etiqueta, los errores se anuncian junto al campo que los provoca y ninguna
+  imagen ni botón se anuncia con un texto sin sentido.
+- **CA-22 · RF-01, RF-11:** Dado el formulario de alta con datos escritos, cuando
+  giro el dispositivo o salgo y vuelvo a la app, entonces sigo viendo lo que había
+  escrito, incluida la foto elegida.
 
 ## Cómo se comprueba el comportamiento
 
@@ -244,46 +304,30 @@ No marques los criterios como superados durante la especificación. -->
 | CA-03 | Con catálogo remoto accesible y al menos un perro dado de alta, abrir el listado | Aparecen los perros remotos y los propios en una sola lista, sin repeticiones |
 | CA-04 | Escribir en el buscador parte del nombre y, después, parte de la raza de un perro dado de alta | El perro aparece en ambos casos |
 | CA-05 | Con un catálogo remoto que incluya un perro con el mismo identificador que uno dado de alta, abrir el listado | El perro dado de alta sigue presente y con sus datos intactos |
-| CA-06 | Abrir el alta, dejar vacío un campo obligatorio o escribir un valor no válido y confirmar | Se indica el campo y el motivo, no se crea ningún perro y lo escrito permanece |
+| CA-06 | Abrir el alta, dejar vacío un campo obligatorio y confirmar | Se indica el campo y el motivo, no se crea ningún perro y lo escrito permanece |
 | CA-07 | Abrir la app con conexión para descargar el catálogo, activar el modo avión, terminar el proceso y volver a abrirla | La lista se muestra completa, con perros remotos y propios, y sin error |
 | CA-08 | Dar de alta un perro dejando vacíos peso, origen y temperamento, y abrir su ficha | La ficha muestra los datos rellenados y no incluye los apartados vacíos |
 | CA-09 | Tras dar de alta un perro con foto, activar el modo avión y recorrer lista y ficha | La foto se ve en ambas pantallas |
 | CA-10 | Abrir el alta y usar la acción de elegir foto | Se abre el selector del sistema sin ninguna petición de permiso previa |
 | CA-11 | En el alta con datos válidos, pulsar confirmar dos o tres veces seguidas | El listado contiene un único perro nuevo |
-| CA-12 | **[PENDIENTE]** (D10, D14) | **[PENDIENTE]** |
+| CA-12 | Con catálogo ya guardado, terminar el proceso y volver a abrir la app con conexión | La lista se ve desde el primer instante y se actualiza sola si el servidor ha cambiado |
+| CA-13 | Descargar el catálogo con conexión sin abrir ninguna ficha, activar el modo avión y abrir la ficha de un perro remoto | Se muestran peso, origen y temperamento sin error |
+| CA-14 | Con perros propios y remotos, abrir el listado y recorrerlo, también con el lector de pantalla activo | Los propios salen primero y su etiqueta se ve y se anuncia |
+| CA-15 | Con un catálogo remoto que ya no incluye un perro previamente descargado, actualizar y revisar la lista | El perro remoto desaparece; los propios siguen presentes |
+| CA-16 | Instalación limpia, modo avión activado desde el principio, abrir la app; después, dar de alta un perro | Aviso comprensible con reintentar, el alta funciona y el perro creado se ve en la lista |
+| CA-17 | Con el catálogo vacío y sin perros propios, abrir el listado; después, buscar un texto que no coincida con nada | Los dos mensajes son distintos y describen situaciones distintas |
+| CA-18 | Abrir el alta, escribir algún dato y volver atrás; repetir confirmando y cancelando | Cancelar mantiene el formulario tal cual; confirmar descarta y vuelve al listado sin crear nada |
+| CA-19 | Con catálogo ya guardado, provocar que la actualización se corte tras la lista y antes de terminar las fichas; volver al listado | El catálogo anterior sigue completo y aparece el aviso de que no se pudo actualizar |
+| CA-20 | Abrir el alta e introducir una edad de 31 años, y después un texto que supere el límite de su campo | En ambos casos se indica el problema y no se crea el perro |
+| CA-21 | Con TalkBack activo, recorrer el formulario de alta —incluido un intento fallido de guardar— y la ficha de un perro | Cada campo y cada error se anuncian de forma comprensible; ninguna imagen o botón se anuncia como «dog» o «back» |
+| CA-22 | Rellenar parte del formulario, girar el dispositivo; después mandar la app a segundo plano y volver | Lo escrito y la foto elegida siguen ahí en los dos casos |
 
 ## Decisiones pendientes
 
 <!-- Al resolverlas, actualiza las secciones afectadas. Escribe Ninguna cuando
 no queden pendientes funcionales ni restricciones por decidir. -->
 
-- **D3 · Campos obligatorios del alta.** Peso, origen y temperamento ya son
-  opcionales. ¿Cuáles de nombre, raza, edad, descripción y foto son obligatorios?
-- **D6 · Punto de entrada al alta.** ¿Desde dónde se abre el formulario?
-- **D7 · Orden y distinción visual.** ¿En qué orden se presenta la lista combinada
-  y se distingue de algún modo a los perros propios?
-- **D8 · Salir del alta sin guardar.** ¿Se descarta lo escrito, se pide
-  confirmación o se conserva como borrador al volver?
-- **D9 · Validaciones.** Rango de edad admitido, longitudes máximas y si se
-  permiten perros con el mismo nombre.
-- **D10 · Cuándo se refresca el catálogo remoto.** ¿En cada apertura, con un gesto
-  manual, cada cierto tiempo?
-- **D11 · Estados de error y vacío.** ¿Entra en el alcance mejorar el mensaje de
-  error actual, añadir reintento y distinguir «catálogo vacío» de «búsqueda sin
-  resultados», o se deja como está?
-- **D12 · Fichas de perros remotos sin conexión.** El peso, el origen y el
-  temperamento de un perro remoto llegan en una petición aparte por perro, así que
-  solo estarán disponibles sin conexión si se han guardado antes. ¿Se guardan
-  todas al refrescar el catálogo, solo las de las fichas que se hayan abierto, o
-  las fichas remotas no están disponibles sin conexión?
-- **D13 · Primer uso sin conexión.** ¿Qué se ve al abrir la app por primera vez sin
-  red y sin nada descargado todavía?
-- **D14 · Perros remotos que cambian o desaparecen.** Si el catálogo remoto
-  modifica los datos de un perro o deja de incluirlo, ¿se actualiza, se conserva
-  lo descargado o se elimina del dispositivo?
-- **D15 · Exclusiones y regla RF-05.** Confirmar las exclusiones propuestas en
-  «Fuera de alcance» y la regla de que un perro propio nunca se pierde por una
-  actualización remota.
+Ninguna.
 
 <!-- ANTES DE SOLICITAR APROBACIÓN
 Comprueba que el alcance está acordado, los flujos son coherentes, los puntos
